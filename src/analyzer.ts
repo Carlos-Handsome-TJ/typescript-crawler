@@ -1,5 +1,5 @@
-import fs from 'fs'
 import cheerio from 'cheerio'
+import fs from 'fs'
 import { Analyze } from './crawler'
 
 interface Course {
@@ -13,7 +13,14 @@ interface CourseInfo {
 interface FileContent {
     [propName: number]: Course[];
 }
-export default class Analyzer implements Analyze{
+export default class Analyzer implements Analyze {
+    private static instance: Analyzer;
+    public static getInstance() {
+        if (!Analyzer.instance) {
+            Analyzer.instance = new Analyzer()
+        }
+        return Analyzer.instance
+    }
     private getCourseInfo(html: string) {
         const $ = cheerio.load(html)
         const courseItem = $('.course-item')
@@ -31,17 +38,18 @@ export default class Analyzer implements Analyze{
             data: courseInfo
         }
     }
-    private getJsonContent(courseContent: CourseInfo, filePath: string) {
-        let courseResult: FileContent = {}
+    private getJsonContent(courseInfo: CourseInfo, filePath: string) {
+        let courseContent: FileContent = {}
         if (fs.existsSync(filePath)) {
-            courseResult = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
+            courseContent = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
         }
-        courseResult[courseContent.time] = courseContent.data
-        return JSON.stringify(courseResult)
+        courseContent[courseInfo.time] = courseInfo.data
+        return JSON.stringify(courseContent)
     }
     public analyze(html: string, filePath: string) {
-        const courseInfo = this.getCourseInfo(html)
-        const courseResult = this.getJsonContent(courseInfo, filePath)
-        return courseResult
+        const courseResult = this.getCourseInfo(html)
+        const jsonFile = this.getJsonContent(courseResult, filePath)
+        return jsonFile
     }
+    private constructor() {}
 }
