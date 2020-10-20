@@ -1,12 +1,11 @@
 import fs from 'fs'
 import path from 'path'
 import superagent from 'superagent'
-import Analyzer from './analyzer'
 
 export interface Analyze {
     analyze: (html: string, filePath: string) => string
 }
-class Crawler {
+export default class Crawler {
     private filePath = path.resolve(__dirname, '../data/data.json')
     private async getRawHtml() {
         const result = await superagent.get(this.url)
@@ -24,6 +23,3 @@ class Crawler {
         this.initSpiderProcess()
     }
 }
-const url = 'http://www.dell-lee.com/typescript/demo.html?secret' + 'x3b174jsx'
-const analyze = Analyzer.getInstance()
-new Crawler(url, analyze)
